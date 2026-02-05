@@ -1,4 +1,9 @@
-import Image from "next/image";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Sports Tracker - Home",
+  description: "Track and manage your sports activities and matches",
+};
 
 export default function Home() {
   return (
