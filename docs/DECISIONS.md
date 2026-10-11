@@ -245,3 +245,24 @@ Consequences:
   series at that date. Text never uses the series colour; a swatch beside it does.
 - **Drawn after mount at the real width**, so text isn't stretched and dates use the
   viewer's timezone. The same data is always also on the page as a list or table.
+
+### 3. CSV import and export
+
+- **Export: four public CSV downloads** (league table, player stats, matches, every goal)
+  at `/api/leagues/<slug>/export/<kind>`, linked from the admin settings page. Public,
+  because it's the same data the public pages show. Built from the same snapshot as the
+  pages, so a download always matches the screen. Times are UTC ISO strings, which every
+  spreadsheet parses.
+- **Formula-injection guard on export.** A cell starting with `= + - @` (or tab/CR) gets a
+  leading apostrophe, so a player named `=HYPERLINK(...)` can't run anything when the
+  organiser opens the file. Numbers (e.g. goal difference -2) are written as numbers.
+- **Import: rosters only (player, team).** The common real need is "I have the team list
+  in a spreadsheet". Importing match results would need date/team matching rules and is
+  easy to get subtly wrong; results are quick to enter by hand.
+- **Import is safe to repeat**: names are matched ignoring case; existing players are
+  skipped; missing teams are created; problems are reported with the spreadsheet's line
+  numbers. One transaction; players inserted with one `createMany`.
+- **Own CSV parser (~40 lines, tested)** rather than a dependency: quotes, commas and line
+  breaks in quotes, `""`, CRLF, Excel's byte-order mark. Limits: 200 KB, 500 rows.
+- **The file is read in the browser** and shown in the text box before import, so the
+  organiser sees exactly what will be sent; the server re-validates everything.

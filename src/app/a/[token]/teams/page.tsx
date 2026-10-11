@@ -6,6 +6,7 @@ import { findLeagueByAdminToken } from "@/server/leagues";
 import { getLeagueSnapshot, type PlayerView } from "@/server/snapshot";
 import { deletePlayer, deleteTeam } from "../actions";
 import { AddPlayerForm, EditPlayerForm } from "../_components/PlayerForms";
+import { RosterImportForm } from "../_components/RosterImportForm";
 import { AddTeamForm, RenameTeamForm } from "../_components/TeamForms";
 
 export const metadata: Metadata = { title: "Teams & players" };
@@ -119,6 +120,12 @@ export default async function AdminTeamsPage({ params }: PageProps<"/a/[token]/t
             ))}
           </div>
         )}
+      </Section>
+
+      <Section title="Import from a spreadsheet" id="import">
+        <Card>
+          <RosterImportForm token={token} />
+        </Card>
       </Section>
     </div>
   );

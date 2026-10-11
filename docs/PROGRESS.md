@@ -36,6 +36,9 @@ Read this first in every session. Updated after each step.
 - M7.1 Player profiles + personal feed (PR #7): player pages with totals, rank and
   per-match log; follow button; home page shows this device's leagues (latest, next,
   live, leader) and followed players. Unit + e2e tests.
+- M7.2 Charts: player goals/assists over the season, top-3 scoring race (hand-written
+  SVG step charts, validated palette, hover/keyboard crosshair).
+- M7.3 CSV: four public CSV downloads (formula-safe); roster import (paste or file).
 
 ## In progress
 - M7 Stretch, in order: player profiles + personal feed on the home page; stat charts

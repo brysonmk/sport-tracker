@@ -3,6 +3,7 @@
  *   - `ok`: the action succeeded
  *   - `error`: one message for the whole form
  *   - `fieldErrors`: messages per input name, shown under that input
+ *   - `message`: a success message to show (e.g. an import summary)
  *   - `values`: what the user typed, sent back on failure. React 19 resets a form after
  *     its action runs, so without this a validation error would also wipe the inputs.
  *
@@ -10,6 +11,7 @@
  */
 export type FormState = {
   ok?: boolean;
+  message?: string;
   error?: string;
   fieldErrors?: Record<string, string[] | undefined>;
   values?: Record<string, string>;

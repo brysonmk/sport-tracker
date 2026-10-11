@@ -5,6 +5,13 @@ import { CopyLink } from "@/components/ui/CopyLink";
 import { findLeagueByAdminToken } from "@/server/leagues";
 import { RenameLeagueForm } from "../_components/RenameLeagueForm";
 
+const DOWNLOADS = [
+  { kind: "standings", label: "League table" },
+  { kind: "players", label: "Player stats" },
+  { kind: "matches", label: "Matches and scores" },
+  { kind: "goals", label: "Every goal (scorer, assist, minute)" },
+];
+
 export const metadata: Metadata = { title: "Links & settings" };
 
 export default async function AdminSettingsPage({ params }: PageProps<"/a/[token]/settings">) {
@@ -34,6 +41,21 @@ export default async function AdminSettingsPage({ params }: PageProps<"/a/[token
       <Section title="League" id="league-settings">
         <Card>
           <RenameLeagueForm token={token} name={league.name} />
+        </Card>
+      </Section>
+
+      <Section title="Download data" id="downloads">
+        <Card>
+          <p className="mb-3 text-sm text-muted">CSV files that open in Excel, Google Sheets or Numbers. Times are in UTC.</p>
+          <ul className="flex flex-col gap-2">
+            {DOWNLOADS.map((d) => (
+              <li key={d.kind}>
+                <a href={`/api/leagues/${league.slug}/export/${d.kind}`} download className="text-accent underline">
+                  {d.label}
+                </a>
+              </li>
+            ))}
+          </ul>
         </Card>
       </Section>
     </div>
