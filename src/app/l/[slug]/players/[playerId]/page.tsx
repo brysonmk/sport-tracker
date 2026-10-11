@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { FollowPlayerButton } from "@/components/FollowPlayerButton";
+import { StepChart } from "@/components/StepChart";
 import { Card, EmptyState, Section } from "@/components/ui/Card";
 import { LocalTime } from "@/components/ui/LocalTime";
+import { goalsAndAssistsSeries } from "@/domain/chartSeries";
+import { groupMatches, matchTime } from "@/domain/matchList";
 import { playerLog } from "@/domain/playerLog";
 import type { Outcome } from "@/domain/score";
 import { findLeagueBySlug } from "@/server/leagues";
@@ -33,7 +36,13 @@ export default async function PlayerPage({ params }: PageProps<"/l/[slug]/player
 
   // Rank among scorers: 1 + number of players with more goals (ties share a rank).
   const rank = stats.goals > 0 ? 1 + playerStats.filter((s) => s.goals > stats.goals).length : null;
-  const log = playerLog(playerId, matches).reverse(); // newest first
+  const chronological = playerLog(playerId, matches);
+  const log = [...chronological].reverse(); // newest first, for the list
+  const { goals, assists } = goalsAndAssistsSeries(chronological);
+  // The chart spans the league's season so far: first to latest finished match.
+  const { results } = groupMatches(matches);
+  const seasonStart = results.at(-1) ? matchTime(results.at(-1)!).getTime() : 0;
+  const seasonEnd = results[0] ? matchTime(results[0]).getTime() : 0;
 
   const tiles = [
     { label: "Goals", value: stats.goals },
@@ -64,6 +73,22 @@ export default async function PlayerPage({ params }: PageProps<"/l/[slug]/player
           </Card>
         ))}
       </dl>
+
+      {chronological.length > 0 && (
+        <Section title="Over the season" id="chart">
+          <Card>
+            <StepChart
+              description={`${player.name}'s goals and assists so far this season`}
+              start={seasonStart}
+              end={seasonEnd}
+              series={[
+                { key: "goals", label: "Goals", points: goals },
+                { key: "assists", label: "Assists", points: assists },
+              ]}
+            />
+          </Card>
+        </Section>
+      )}
 
       <Section title="Goals and assists by match" id="log">
         {log.length === 0 ? (

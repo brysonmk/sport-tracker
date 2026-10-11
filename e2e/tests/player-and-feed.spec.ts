@@ -19,6 +19,7 @@ test.describe("Player profiles and the personal feed", () => {
     await expect(playerPage.stat("Goals")).toHaveText("2");
     await expect(playerPage.stat("Assists")).toHaveText("0");
     await expect(playerPage.stat("Scorer rank")).toHaveText("#1");
+    await expect(page.getByRole("img", { name: /Leo's goals and assists.*Latest: Goals 2, Assists 0/ })).toBeVisible();
     await expect(playerPage.matchLog).toHaveCount(1);
     await expect(playerPage.matchLog.first()).toContainText("Lions 2–1 Tigers");
     await expect(playerPage.matchLog.first()).toContainText("2 G");

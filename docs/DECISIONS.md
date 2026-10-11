@@ -225,3 +225,23 @@ Consequences:
 - **The player page counts involvement, not appearances.** The app records goals, not
   line-ups, so "matches played" can't be known. The page shows goals, assists, scorer rank
   and a per-match log (`playerLog`, unit-tested), with running totals ready for charts.
+
+### 2. Charts of player stats over time
+
+- **Hand-written SVG, no chart library** (`src/components/StepChart.tsx`, ~200 lines). Two
+  small charts don't justify a dependency, and every line of the chart is readable.
+- **Step lines of running totals.** Goals so far only change when a goal happens, so the
+  line is flat between matches and jumps on match day; a sloped line would invent goals
+  between matches.
+- **Where:** a player's goals and assists over the season (player page), and the top 3
+  scorers' race (players page). Three series max: the palette's first three colours pass
+  colour-blind separation checks for every pair, on our own light and dark card colours
+  (validated with the dataviz palette script). The one light-mode colour under 3:1
+  contrast (aqua) is covered by end labels, the legend, the tooltip and the table.
+- **Overlapping lines are nudged by 3 px** so a tie never hides a player; exact values are
+  in the tooltip and end labels.
+- **Interaction:** the crosshair snaps to the nearest match date on hover or tap; the
+  chart is focusable and the arrow keys step through dates. The tooltip lists every
+  series at that date. Text never uses the series colour; a swatch beside it does.
+- **Drawn after mount at the real width**, so text isn't stretched and dates use the
+  viewer's timezone. The same data is always also on the page as a list or table.

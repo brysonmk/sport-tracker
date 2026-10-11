@@ -16,6 +16,11 @@
   --accent-soft: #e3f4e9;
   --live: #b91c1c;
   --danger: #b42318;
+  /* Chart series (StepChart): validated for colour-blind separation and contrast on
+     --card in both modes. Slot order matters; don't reorder. */
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --series-3: #1baf7a;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -30,6 +35,9 @@
     --accent-soft: #15301f;
     --live: #ff5c5c;
     --danger: #ff7a6e;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --series-3: #199e70;
   }
 }
 
