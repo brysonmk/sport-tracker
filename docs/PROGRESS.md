@@ -12,19 +12,22 @@ Read this first in every session. Updated after each step.
   placeholder pages replaced (home, about, contact, /open; /login and /matches-table
   redirect), 404 and error pages. Checked by hand in a phone-sized browser: create →
   teams → players → match → goals → finish → table and stats update.
-
-- M3 Live match mode (PR #3): public league pages poll a version endpoint and refresh
+- M3 Live match mode (PR #3, merged): public league pages poll a version endpoint and refresh
   in place (checked by hand: a goal saved in the admin tab showed on the public tab
   2.7 s later without a reload); live match clock; empty goal minute = now while live;
   score-card share image for match links.
+- M4 Ship it (PR #4), everything except the deploy itself: loading skeletons, skip link,
+  unique labels, AA contrast, security headers, `vercel-build` with migrations,
+  docs/DEPLOY.md, README with screenshots + share card + local setup.
+
+## Waiting on the owner
+- **Create the Vercel + Neon accounts**: follow docs/DEPLOY.md (about 5 minutes), then
+  share the production URL. After that: add the live link to the README and check the
+  deployed app (create league, live update, share image).
 
 ## In progress
-- M3: waiting for CI, then merge.
+- M5 End-to-end tests (Playwright + page objects, in CI).
 
 ## Next
-- M4 Ship it: mobile polish, loading/empty/error states, accessibility pass, deploy to
-  Vercel + Neon (owner creates accounts), README with live link and screenshots.
-
-## Known gaps (to handle in M4 polish)
-- Loading states (`loading.tsx`) for league pages.
-- Edit forms in lists have generic labels ("Name"); make them unique for screen readers.
+- M6 Learning pack: ARCHITECTURE.md, WALKTHROUGH.md, QUIZ.md.
+- M7 Stretch (in order, if time allows).

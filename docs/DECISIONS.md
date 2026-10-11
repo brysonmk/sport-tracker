@@ -154,3 +154,31 @@ Consequences:
   `VERCEL_PROJECT_PRODUCTION_URL`, because chat apps need absolute image URLs. Chat apps
   cache previews, so a link shared mid-game can show an older score; that's accepted.
 - **The score has `aria-live="polite"` while live**, so screen readers announce goals.
+
+## M4 Ship it
+
+- **Deploy target: Vercel + Neon, connected through Vercel's Neon integration.** The
+  integration creates the database and stores the connection strings in Vercel, so the
+  owner never copies a secret by hand. `prisma.config.ts` reads the direct URL from
+  `DIRECT_URL` or the integration's `DATABASE_URL_UNPOOLED`.
+- **Migrations run in the Vercel build** (`vercel-build`: `prisma migrate deploy && next
+  build`). A deploy can't go live with code that expects columns the database lacks. If a
+  migration fails, the build fails and the previous deployment keeps serving.
+- **The app uses the pooled URL; migrations use the direct one.** Serverless functions
+  open many short connections (the pooler handles that), but `migrate` needs a session-level
+  lock that a transaction pooler can't hold.
+- **Security headers on every response**: `nosniff`, `X-Frame-Options: DENY`,
+  `Referrer-Policy: strict-origin-when-cross-origin` (other sites only ever see the origin,
+  never an admin link's path).
+- **Loading skeletons** for league and admin pages (`loading.tsx`). The league title and tabs
+  come from the layout, so only the body shows a placeholder.
+- **Accessibility pass**: skip link; repeated edit forms and delete buttons get unique
+  accessible names ("Delete team Lions", "Name of Leo"); all theme colour pairs checked
+  against WCAG AA (≥ 4.5:1); the light-mode LIVE red was darkened from 4.3:1 to pass.
+- **README screenshots are generated** by `scripts/screenshots.ts` (Playwright) from the
+  demo seed against a production build, so they can be re-taken after UI changes.
+- **Demo kickoffs at 23:00 UTC** (7 pm Eastern) instead of whatever time the seed ran.
+- **M4's deploy needs the owner's accounts, so M5 and M6 continue meanwhile.** The brief
+  says to finish each milestone before the next, but the only M4 step left is one I can't
+  do. Everything else in M4 is merged; the live link goes into the README once the
+  account steps in docs/DEPLOY.md are done.
