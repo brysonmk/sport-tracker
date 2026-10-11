@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sports Tracker
 
-## Getting Started
+A soccer league tracker for rec and pickup groups. Create a league without signing up,
+record matches (score, scorers, assists), and everyone gets standings, player stats and
+live scores on their phone.
 
-First, run the development server:
+> Status: under construction. See [docs/PROGRESS.md](docs/PROGRESS.md).
+
+## Local setup
+
+Requirements: Node 24 (see `.nvmrc`), Docker.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install                 # also generates the Prisma client
+cp .env.example .env        # local defaults work as-is
+docker compose up -d        # Postgres 17 on localhost:5433
+npm run db:migrate          # apply migrations
+npm run db:seed             # demo league; prints its public and admin links
+npm run dev                 # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Script | What it does |
+|---|---|
+| `npm run dev` | Next.js dev server |
+| `npm run build` | Production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | Generate route types, then `tsc --noEmit` |
+| `npm test` | Vitest unit tests (`npm run test:watch` to watch) |
+| `npm run db:migrate` | Create/apply Prisma migrations in development |
+| `npm run db:seed` | Replace the demo league |
+| `npm run db:reset` | Drop the local database, re-apply migrations, re-seed |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Docs
 
-## Learn More
+- [docs/PLAN.md](docs/PLAN.md): architecture and milestones
+- [docs/DECISIONS.md](docs/DECISIONS.md): every choice and why
+- [docs/PROGRESS.md](docs/PROGRESS.md): done / in progress / next
 
-To learn more about Next.js, take a look at the following resources:
+## How it was built
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Built by an AI coding agent (Claude Code) working from the brief in
+[CLAUDE.md](CLAUDE.md), in small commits with one pull request per milestone. Each
+choice and its reason is logged in [docs/DECISIONS.md](docs/DECISIONS.md), and CI checks
+lint, types, unit tests, migrations and the build on every pull request.
