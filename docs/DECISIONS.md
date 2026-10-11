@@ -73,3 +73,54 @@ Consequences:
 - **CI runs migrations and the seed against a Postgres service container**, so a broken
   migration or seed fails the PR, not the deploy.
 - **Node 24 (`.nvmrc`)** for CI and Vercel: the current LTS line.
+
+## M2 Core flows
+
+- **Merges keep every commit** (`gh pr merge --merge`, not squash). The brief asks for small
+  commits, and squashing would throw that history away.
+- **Calculations are pure functions in `src/domain/`.** They take plain arrays and return
+  plain arrays, so every standings/stats rule is unit-tested without a database.
+- **Standings and player stats count FINISHED matches only.** A live 3-0 can still become
+  3-3, so the table moves when the final whistle is recorded. The live match page shows
+  the in-progress score separately.
+- **Tiebreakers: points → goal difference → goals scored → head-to-head → shared
+  position.** This is the Premier League order; it's the one most players already know.
+  Head-to-head builds a mini-table from only the matches between the tied teams. Teams
+  still level share a position (shown 1, 1, 3) and are listed alphabetically, instead of
+  pretending the alphabet decided the ranking.
+- **A player can't assist their own goal.** The form prevents it; the stats function also
+  ignores it in case bad data gets in.
+- **Teams can't be deleted while matches point at them (database RESTRICT).** So deleting a
+  whole league must delete its matches first (they cascade to their goals), then the
+  league (cascades to teams and players). The seed does this in one transaction. Tried
+  `ON DELETE NO ACTION` to let one league delete cascade through everything; Postgres
+  still fired the team check before the goals were gone, so it was reverted.
+- **Server Actions for every write, Server Components for every read.** No REST API to
+  maintain: a form posts straight to a typed function on the server. Each action re-checks
+  the admin token, validates with zod, and filters every query by the league's id.
+- **Admin token in the URL (`/a/<token>`), not a cookie.** The link works on any device
+  and can be handed to a co-organiser. Admin pages send `Referrer-Policy: no-referrer` and
+  `noindex` so the token doesn't leak through outgoing links or search engines.
+- **Load the whole league per request.** One snapshot (teams, players, matches with goals)
+  feeds every page. A rec league has tens of matches, so it's fast, and the table, stats
+  and scores always come from the same data. React's `cache()` de-duplicates it between
+  a layout and its page.
+- **All league pages render per request (`ƒ` in the build output).** They read the
+  database, which changes all the time; nothing is cached. The home page calls
+  `connection()` for the same reason (it checks whether the demo league exists).
+- **Dates are formatted in the browser** (`LocalTime`). The server runs in UTC and doesn't
+  know the viewer's timezone. The kickoff input converts local time to ISO in the browser
+  for the same reason.
+- **Copy-link boxes build the full URL in the browser** from `window.location.origin`, so
+  links are right on localhost, Vercel previews and production with no config.
+- **React 19 resets forms after an action**, so failed submissions return the typed
+  values (`FormState.values`) and inputs re-render with them. `<select>`s are keyed on
+  that value because a select's `defaultValue` only applies when it mounts.
+- **`/login` became `/open` ("Open a league")**: there are no accounts, so the page takes a
+  pasted public/admin link and jumps to it (parsed in the browser, nothing sent).
+  `/login` and `/matches-table` redirect permanently so old bookmarks still work.
+- **Contact = GitHub issues.** No invented email address or contact form.
+- **A goal's scorer list shows the scoring team's players first**, then "Other players":
+  in pickup games people sometimes play for the other side.
+- **Teams with matches can't be deleted; players can.** Deleting a team would rewrite past
+  results. Deleting a player keeps their goals in the score as "unknown scorer".
