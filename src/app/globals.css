@@ -1,26 +1,59 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens. Components use these through Tailwind classes such as
+ * `bg-card`, `text-muted`, `border-line`, `bg-accent`, so light and dark mode are
+ * handled here once instead of with `dark:` on every element.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --bg: #f6f7f5;
+  --fg: #14181a;
+  --muted: #5d6b66;
+  --card: #ffffff;
+  --line: #dfe4e1;
+  --accent: #0f7a3d;
+  --accent-fg: #ffffff;
+  --accent-soft: #e3f4e9;
+  --live: #d42a2a;
+  --danger: #b42318;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --bg: #0e1211;
+    --fg: #e9eeec;
+    --muted: #9aa8a3;
+    --card: #171d1b;
+    --line: #2a3330;
+    --accent: #34c26e;
+    --accent-fg: #062512;
+    --accent-soft: #15301f;
+    --live: #ff5c5c;
+    --danger: #ff7a6e;
   }
 }
 
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-card: var(--card);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-live: var(--live);
+  --color-danger: var(--danger);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* Scores and table numbers line up when every digit has the same width. */
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
