@@ -6,15 +6,20 @@ Read this first in every session. Updated after each step.
 - M1 Foundation (PR #1, merged): Firebase leftovers removed, package renamed,
   Next 16.4 / React 19.3, ESLint + typecheck + Vitest, CI, Postgres in Docker,
   Prisma 7 data model + first migration, demo seed, docs/PLAN.md.
+- M2 Core flows (PR #2): create league with no signup (public + admin link), admin
+  teams/players/matches/goals/status, public table/matches/match/players pages,
+  standings with tiebreakers + player stats + match status rules (all unit-tested),
+  placeholder pages replaced (home, about, contact, /open; /login and /matches-table
+  redirect), 404 and error pages. Checked by hand in a phone-sized browser: create →
+  teams → players → match → goals → finish → table and stats update.
 
 ## In progress
-- M2 Core flows (branch `m2-core-flows`)
-  - [x] Domain functions + tests: score, standings with tiebreakers, player stats
-  - [ ] Create league (no signup) + "save your links" page
-  - [ ] Admin auth by token; teams and players
-  - [ ] Matches: schedule, record result with goals/assists
-  - [ ] Public league pages: standings, results, player stats
-  - [ ] Replace placeholder pages, header, footer
+- M2: waiting for CI, then merge.
 
 ## Next
-- M3 Live match mode.
+- M3 Live match mode: public match page updates within seconds while live; faster
+  live-logging UI for the admin; score-card image for match links.
+
+## Known gaps (to handle in M4 polish)
+- Loading states (`loading.tsx`) for league pages.
+- Edit forms in lists have generic labels ("Name"); make them unique for screen readers.
