@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { connection } from "next/server";
+import { PersonalFeed } from "@/components/PersonalFeed";
 import { buttonClasses } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { findLeagueBySlug } from "@/server/leagues";
@@ -31,6 +32,8 @@ export default async function Home() {
 
   return (
     <div>
+      {/* Leagues and players this device follows; empty for first-time visitors. */}
+      <PersonalFeed />
       <section className="py-8 text-center sm:py-14">
         <h1 className="mx-auto max-w-xl text-3xl font-bold leading-tight sm:text-4xl">
           Standings, scorers and live scores for your soccer league

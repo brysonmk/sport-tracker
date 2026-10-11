@@ -29,9 +29,13 @@ Read this first in every session. Updated after each step.
   × 2 projects (mobile, desktop) covering create league, record match, standings
   update, live view; console-error guard; runs in CI against a production build.
   Locally 18/18 passed, and 54/54 with `--repeat-each=3`.
-- M6 Learning pack (PR #6): docs/ARCHITECTURE.md (two Mermaid diagrams, checked to
+- M6 Learning pack (PR #6, merged): docs/ARCHITECTURE.md (two Mermaid diagrams, checked to
   render), docs/WALKTHROUGH.md (reading order + one goal traced with file:line),
   docs/QUIZ.md (15 questions, answers at the bottom).
+
+- M7.1 Player profiles + personal feed (PR #7): player pages with totals, rank and
+  per-match log; follow button; home page shows this device's leagues (latest, next,
+  live, leader) and followed players. Unit + e2e tests.
 
 ## In progress
 - M7 Stretch, in order: player profiles + personal feed on the home page; stat charts

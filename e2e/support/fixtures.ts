@@ -3,6 +3,8 @@ import { AdminMatchPage } from "../pages/AdminMatchPage";
 import { AdminMatchesPage } from "../pages/AdminMatchesPage";
 import { AdminTeamsPage } from "../pages/AdminTeamsPage";
 import { CreateLeaguePage } from "../pages/CreateLeaguePage";
+import { HomePage } from "../pages/HomePage";
+import { PlayerPage } from "../pages/PlayerPage";
 import { PublicLeaguePage } from "../pages/PublicLeaguePage";
 import { PublicMatchPage } from "../pages/PublicMatchPage";
 import { PublicPlayersPage } from "../pages/PublicPlayersPage";
@@ -40,6 +42,8 @@ type Fixtures = {
   publicLeaguePage: PublicLeaguePage;
   publicMatchPage: PublicMatchPage;
   publicPlayersPage: PublicPlayersPage;
+  playerPage: PlayerPage;
+  homePage: HomePage;
 };
 
 export const test = base.extend<Fixtures>({
@@ -93,6 +97,8 @@ export const test = base.extend<Fixtures>({
   publicLeaguePage: async ({ page }, use) => use(new PublicLeaguePage(page)),
   publicMatchPage: async ({ page }, use) => use(new PublicMatchPage(page)),
   publicPlayersPage: async ({ page }, use) => use(new PublicPlayersPage(page)),
+  playerPage: async ({ page }, use) => use(new PlayerPage(page)),
+  homePage: async ({ page }, use) => use(new HomePage(page)),
 });
 
 export { expect } from "@playwright/test";

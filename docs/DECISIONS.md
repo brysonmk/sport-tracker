@@ -206,3 +206,22 @@ Consequences:
   Postgres service, uploading the HTML report (traces, screenshots) when it fails.
 - **The live spec arranges an already-live match** so it runs on the 3 s polling path.
   The 30 s idle path is the same code with a different interval.
+
+## M7 Stretch
+
+### 1. Player profiles and a personal feed
+
+- **"Personal" without accounts means "this device".** The leagues you've opened and the
+  players you follow are kept in `localStorage` (`src/lib/follows.ts`). No signup, nothing
+  personal on the server. It doesn't sync between devices; that's the cost of no accounts.
+- **Leagues are remembered automatically when visited**, most recent first, capped at 10.
+  Players are followed explicitly with a button, capped at 20.
+- **The admin token is remembered on the device that opened the admin link**, so "Your
+  leagues" can show an *Admin* shortcut. It only ever goes into this browser's storage,
+  where the link already was (history, bookmarks). It's never sent to the feed API.
+- **One feed endpoint** (`GET /api/feed?leagues=…&players=…`) returns public summaries for
+  all followed leagues and players, refreshed every 30 s while the home page is visible.
+  Inputs are filtered by shape (slug/id regex) and capped before any query.
+- **The player page counts involvement, not appearances.** The app records goals, not
+  line-ups, so "matches played" can't be known. The page shows goals, assists, scorer rank
+  and a per-match log (`playerLog`, unit-tested), with running totals ready for charts.
