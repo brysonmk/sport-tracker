@@ -277,6 +277,9 @@ Consequences:
   navigations network-first and falls back to a cached `/offline` page; it never caches
   league data or API responses. Caching scores would mean showing a stale table or score
   during a match, which is worse than showing "you're offline".
+- **It also keeps copies of the build's static files** (`/_next/static/…`, content-hashed
+  and never changed), so the offline page has its styles. Found in self-review: the first
+  version cached only the page's HTML, which rendered unstyled offline.
 - **Registered in production builds only**, so it never interferes with hot reloading;
   `/sw.js` is served with `no-cache` so fixes reach phones on the next visit.
 - **Checked with Chrome's own installability check** (DevTools protocol
