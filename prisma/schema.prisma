@@ -1,0 +1,114 @@
+// Data model for Sports Tracker (soccer).
+//
+//   League ──< Team ──< Player
+//     │
+//     └──< Match ──< MatchEvent (one row per goal, with an optional assist)
+//
+// The score of a match is NOT stored. It is counted from its goal events, so the
+// score, the standings and the player stats can never disagree with each other.
+// See docs/DECISIONS.md ("Score is derived from events").
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model League {
+  id             String   @id @default(cuid())
+  /// Public, shareable id used in /l/<slug>. Readable name + random suffix.
+  slug           String   @unique
+  name           String
+  /// SHA-256 of the secret admin token. The token itself is only ever in the admin link.
+  adminTokenHash String   @unique
+  createdAt      DateTime @default(now())
+
+  teams   Team[]
+  players Player[]
+  matches Match[]
+}
+
+model Team {
+  id        String   @id @default(cuid())
+  leagueId  String
+  league    League   @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  name      String
+  createdAt DateTime @default(now())
+
+  players     Player[]
+  homeMatches Match[]      @relation("HomeTeam")
+  awayMatches Match[]      @relation("AwayTeam")
+  goals       MatchEvent[]
+
+  @@unique([leagueId, name])
+}
+
+model Player {
+  id        String   @id @default(cuid())
+  leagueId  String
+  league    League   @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  /// Current team. Optional so a player can be a free agent, and so deleting a team
+  /// doesn't delete its players' history.
+  teamId    String?
+  team      Team?    @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  name      String
+  createdAt DateTime @default(now())
+
+  goals   MatchEvent[] @relation("Scorer")
+  assists MatchEvent[] @relation("Assister")
+
+  @@unique([leagueId, name])
+}
+
+enum MatchStatus {
+  SCHEDULED
+  LIVE
+  FINISHED
+}
+
+model Match {
+  id         String      @id @default(cuid())
+  leagueId   String
+  league     League      @relation(fields: [leagueId], references: [id], onDelete: Cascade)
+  homeTeamId String
+  homeTeam   Team        @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  awayTeamId String
+  awayTeam   Team        @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  status     MatchStatus @default(SCHEDULED)
+  /// When the match is planned to start (optional for pickup games).
+  kickoffAt  DateTime?
+  startedAt  DateTime?
+  finishedAt DateTime?
+  createdAt  DateTime    @default(now())
+  /// Bumped on every change, including when a goal is added (see src/server). The
+  /// live page uses it to tell whether anything changed.
+  updatedAt  DateTime    @updatedAt
+
+  events MatchEvent[]
+
+  @@index([leagueId, status])
+}
+
+/// A goal. `teamId` is the team credited with the goal. The scorer is optional so an
+/// own goal or an unknown scorer still counts toward the score. Storing teamId here
+/// (instead of reading it from the scorer) keeps old results correct when a player
+/// later changes teams.
+model MatchEvent {
+  id        String   @id @default(cuid())
+  matchId   String
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id])
+  scorerId  String?
+  scorer    Player?  @relation("Scorer", fields: [scorerId], references: [id], onDelete: SetNull)
+  assistId  String?
+  assist    Player?  @relation("Assister", fields: [assistId], references: [id], onDelete: SetNull)
+  /// Minute of the match, if the admin entered one.
+  minute    Int?
+  createdAt DateTime @default(now())
+
+  @@index([matchId])
+}
