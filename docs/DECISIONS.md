@@ -282,3 +282,31 @@ Consequences:
 - **Checked with Chrome's own installability check** (DevTools protocol
   `Page.getInstallabilityErrors`: none) against a production build, and the offline
   fallback with Playwright's offline mode.
+
+### 5. AI match recaps
+
+- **Off unless `ANTHROPIC_API_KEY` is set.** With no key, no recap UI renders anywhere and
+  nothing calls the API (an e2e test checks this). The key lives in `.env` / Vercel only.
+- **Written on demand by the admin, stored on the match.** A "Write recap" button on a
+  finished match's admin page; the text is saved in `Match.recap` and shown on the public
+  match page. Not generated per page view (cost, latency) and not automatically on
+  "Finish" (the admin often fixes goals right after the whistle).
+- **Cleared whenever goals or status change**, so a recap never describes a different
+  score than the one on screen. The admin rewrites it with one tap.
+- **The model sees only the match facts** (teams, final score, each goal's minute, team,
+  scorer, assist) as JSON, and the instructions forbid inventing anything else. Names are
+  data inside a marked block and the prompt says to treat them only as names, so a player
+  called "ignore your instructions" can't steer it. Output is plain text, cleaned and
+  capped at 1000 characters, and labelled "Written by AI" on the page.
+- **Model `claude-opus-5-5` at `effort: "low"`.** Opus 5.5 is the current default model;
+  a 2–4 sentence factual summary doesn't need deep reasoning, so low effort keeps it fast
+  and cheap. `fallbacks: "default"` (server-side fallback beta) retries on another model
+  inside the same call if a safety classifier declines; a final refusal or `max_tokens`
+  stop is shown as an error rather than partial text.
+- **Errors are mapped from the SDK's typed classes** (auth, rate limit, other API errors)
+  to readable messages; anything else is a bug and is rethrown.
+- **Not verified against the real API**: there's no key on the development machine.
+  Response handling is unit-tested with a stub client (text, refusal, max_tokens, empty,
+  API errors). First real check: set the key and write one recap.
+- **`server-only` is aliased to an empty module in Vitest** so server modules like
+  `src/server/recap.ts` can be unit-tested directly.

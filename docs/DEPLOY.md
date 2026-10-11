@@ -57,3 +57,11 @@ environments. Then redeploy.
 | `DATABASE_URL` | Vercel (set by the Neon integration) | Pooled connection used by the app |
 | `DATABASE_URL_UNPOOLED` or `DIRECT_URL` | Vercel | Direct connection used by migrations |
 | `APP_URL` | optional | Absolute base URL for share images. If unset, Vercel's production domain is used |
+| `ANTHROPIC_API_KEY` | optional | Turns on AI match recaps. Unset = the feature is hidden |
+
+## Optional: AI match recaps
+
+Create an API key at <https://platform.claude.com> (Settings → API keys; using the API
+needs billing set up there). In Vercel → *Settings → Environment Variables*, add
+`ANTHROPIC_API_KEY` for Production (and Preview if you want it there too), then redeploy.
+For local use, put it in `.env`. Each recap is one short request.

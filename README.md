@@ -27,6 +27,12 @@ All names and results in the screenshots are demo data from [prisma/seed.ts](pri
 - **Live mode**: the admin logs goals during the game; public pages update within about
   3 seconds without a refresh, with a running match clock.
 - **Share image** for match links (Open Graph).
+- **Player pages** with goals and assists over the season, a scoring-race chart, and a
+  personal home-page feed of the leagues and players you follow (stored on your device).
+- **CSV**: download the table, stats, matches and goals; import a roster from a spreadsheet.
+- **Installable** on a phone's home screen, with an offline page.
+- **AI match recaps** (optional): with an Anthropic API key set, the admin can add a short
+  recap written from the recorded goals. Without a key the feature is hidden.
 
 ## Tech
 
