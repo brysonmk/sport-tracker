@@ -73,3 +73,20 @@ Consequences:
 - **CI runs migrations and the seed against a Postgres service container**, so a broken
   migration or seed fails the PR, not the deploy.
 - **Node 24 (`.nvmrc`)** for CI and Vercel: the current LTS line.
+
+## M2 Core flows
+
+- **Merges keep every commit** (`gh pr merge --merge`, not squash). The brief asks for small
+  commits, and squashing would throw that history away.
+- **Calculations are pure functions in `src/domain/`.** They take plain arrays and return
+  plain arrays, so every standings/stats rule is unit-tested without a database.
+- **Standings and player stats count FINISHED matches only.** A live 3-0 can still become
+  3-3, so the table moves when the final whistle is recorded. The live match page shows
+  the in-progress score separately.
+- **Tiebreakers: points → goal difference → goals scored → head-to-head → shared
+  position.** This is the Premier League order; it's the one most players already know.
+  Head-to-head builds a mini-table from only the matches between the tied teams. Teams
+  still level share a position (shown 1, 1, 3) and are listed alphabetically, instead of
+  pretending the alphabet decided the ranking.
+- **A player can't assist their own goal.** The form prevents it; the stats function also
+  ignores it in case bad data gets in.
