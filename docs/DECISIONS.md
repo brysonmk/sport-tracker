@@ -182,3 +182,27 @@ Consequences:
   says to finish each milestone before the next, but the only M4 step left is one I can't
   do. Everything else in M4 is merged; the live link goes into the README once the
   account steps in docs/DEPLOY.md are done.
+
+## M5 End-to-end tests
+
+- **Arrange through the database, act through the UI.** Tests create their leagues with
+  the app's own Prisma client and token helpers (`e2e/support/arrange.ts`) and only click
+  through the flow they test. Faster, less flaky, and a broken "add team" screen fails one
+  test instead of all of them.
+- **Each test cleans up what it created**, in fixture teardown, so the suite can run
+  against the dev database without wiping it and in parallel.
+- **Two projects: Pixel 7 and Desktop Chrome.** Mobile first, plus desktop to catch layout
+  differences (some table columns only exist on wider screens).
+- **Role/label locators everywhere; `data-col` only on stats cells.** Hidden cells aren't
+  in the accessibility tree, so reading them by role fails on phones.
+- **Any console error fails a test** (auto fixture, with a per-test allowlist). Adding it
+  immediately caught a real React warning (see below).
+- **`key` goes before `{...spread}` in JSX.** A key after a spread makes the compiler fall
+  back to `createElement`, which changed how React validated the `<select>`'s children and
+  logged a "missing key" warning.
+- **`"type": "module"` in package.json.** Prisma 7's generated client is ESM
+  (`import.meta`); Playwright compiles tests as CommonJS unless the package is ESM.
+- **CI runs the suite against a production build** (`next build` + `next start`) with a
+  Postgres service, uploading the HTML report (traces, screenshots) when it fails.
+- **The live spec arranges an already-live match** so it runs on the 3 s polling path.
+  The 30 s idle path is the same code with a different interval.
