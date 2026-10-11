@@ -55,6 +55,8 @@ those functions. So every number on the standings page can be tested without a d
 
 ## Milestones
 
+The checklist below is the original plan. Current status lives in `docs/PROGRESS.md`.
+
 ### M1 Foundation
 - [x] Remove Firebase Studio leftovers, rename package
 - [x] ESLint (flat config), typecheck script, Vitest
