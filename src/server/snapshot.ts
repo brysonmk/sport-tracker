@@ -41,6 +41,7 @@ export type MatchView = {
   finishedAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
+  recap: string | null;
   home: TeamView;
   away: TeamView;
   score: Score;
@@ -115,6 +116,7 @@ export function toMatchView(m: MatchRow): MatchView {
     finishedAt: m.finishedAt,
     createdAt: m.createdAt,
     updatedAt: m.updatedAt,
+    recap: m.recap,
     home: m.homeTeam,
     away: m.awayTeam,
     score: scoreOf({ homeTeamId: m.homeTeamId, awayTeamId: m.awayTeamId, goals }),

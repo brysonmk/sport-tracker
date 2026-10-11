@@ -14,6 +14,7 @@
 import { redirect } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
 import { elapsedMinute } from "@/domain/matchClock";
+import { recapFacts } from "@/domain/recap";
 import { parseRoster } from "@/domain/roster";
 import { statusChange } from "@/domain/matchStatus";
 import type { MatchStatus } from "@/domain/types";
@@ -21,6 +22,8 @@ import { parseCsv } from "@/lib/csv";
 import { db } from "@/lib/db";
 import type { FormState } from "@/lib/formState";
 import { requireAdminLeague, revalidateLeague } from "@/server/admin";
+import { recapsEnabled, writeRecap } from "@/server/recap";
+import { getLeagueSnapshot } from "@/server/snapshot";
 import {
   formToObject,
   fromZodError,
@@ -229,7 +232,8 @@ export async function changeMatchStatus(token: string, matchId: string, to: Matc
   const change = statusChange(match, to, new Date());
   if (!change) throw new Error(`Can't change a ${match.status.toLowerCase()} match to ${to.toLowerCase()}`);
 
-  await db.match.update({ where: { id: match.id }, data: change });
+  // A recap describes a final result; any change makes it stale, so it's removed.
+  await db.match.update({ where: { id: match.id }, data: { ...change, recap: null, recapAt: null } });
   revalidateLeague(league, token);
 }
 
@@ -259,7 +263,7 @@ export async function addGoal(token: string, matchId: string, _prev: FormState, 
   // latest updatedAt to know when to refresh (see src/app/api/leagues/[slug]/version).
   await db.$transaction([
     db.matchEvent.create({ data: { matchId: match.id, ...goal, minute } }),
-    db.match.update({ where: { id: match.id }, data: { updatedAt: now } }),
+    db.match.update({ where: { id: match.id }, data: { updatedAt: now, recap: null, recapAt: null } }),
   ]);
   revalidateLeague(league, token);
   return { ok: true };
@@ -272,7 +276,26 @@ export async function deleteGoal(token: string, goalId: string): Promise<void> {
 
   await db.$transaction([
     db.matchEvent.delete({ where: { id: goal.id } }),
-    db.match.update({ where: { id: goal.matchId }, data: { updatedAt: new Date() } }),
+    db.match.update({ where: { id: goal.matchId }, data: { updatedAt: new Date(), recap: null, recapAt: null } }),
   ]);
   revalidateLeague(league, token);
+}
+
+// ─── AI recap ────────────────────────────────────────────────────────────────
+
+/** Writes (or rewrites) the AI recap of a finished match. Only when recaps are enabled. */
+export async function writeMatchRecap(token: string, matchId: string): Promise<FormState> {
+  const league = await requireAdminLeague(token);
+  if (!recapsEnabled()) return { error: "AI recaps aren't set up on this server." };
+
+  const match = (await getLeagueSnapshot(league.id)).matches.find((m) => m.id === matchId);
+  if (!match) return { error: "Match not found" };
+  if (match.status !== "FINISHED") return { error: "Finish the match first; a recap describes the final result." };
+
+  const result = await writeRecap(recapFacts(match));
+  if (!result.ok) return { error: result.error };
+
+  await db.match.update({ where: { id: match.id }, data: { recap: result.text, recapAt: new Date() } });
+  revalidateLeague(league, token);
+  return { ok: true };
 }

@@ -2,15 +2,18 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { GoalTimeline } from "@/components/GoalTimeline";
+import { RecapCard } from "@/components/RecapCard";
 import { Scoreboard } from "@/components/Scoreboard";
 import { Button } from "@/components/ui/Button";
 import { Card, EmptyState, Section } from "@/components/ui/Card";
 import { ConfirmButton } from "@/components/ui/ConfirmButton";
 import type { MatchStatus } from "@/domain/types";
 import { findLeagueByAdminToken } from "@/server/leagues";
+import { recapsEnabled } from "@/server/recap";
 import { getLeagueSnapshot } from "@/server/snapshot";
 import { changeMatchStatus, deleteGoal, deleteMatch } from "../../actions";
 import { GoalForm } from "../../_components/GoalForm";
+import { RecapForm } from "../../_components/RecapForm";
 
 export const metadata: Metadata = { title: "Record match" };
 
@@ -82,6 +85,20 @@ export default async function AdminMatchPage({ params }: PageProps<"/a/[token]/m
           </Card>
         )}
       </Section>
+
+      {/* Only when ANTHROPIC_API_KEY is set, and only for finished matches. */}
+      {recapsEnabled() && match.status === "FINISHED" && (
+        <Section title="AI recap" id="recap">
+          <div className="flex flex-col gap-3">
+            {match.recap ? (
+              <RecapCard recap={match.recap} />
+            ) : (
+              <p className="text-sm text-muted">Write a short summary of this match for the public page.</p>
+            )}
+            <RecapForm token={token} matchId={match.id} hasRecap={Boolean(match.recap)} />
+          </div>
+        </Section>
+      )}
 
       <Section title="Danger zone" id="danger">
         <ConfirmButton

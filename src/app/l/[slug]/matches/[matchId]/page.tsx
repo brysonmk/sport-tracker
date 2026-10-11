@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { GoalTimeline } from "@/components/GoalTimeline";
+import { RecapCard } from "@/components/RecapCard";
 import { Scoreboard } from "@/components/Scoreboard";
 import { Card, EmptyState, Section } from "@/components/ui/Card";
 import { findLeagueBySlug } from "@/server/leagues";
+import { recapsEnabled } from "@/server/recap";
 import { getLeagueSnapshot } from "@/server/snapshot";
 
 export async function generateMetadata({ params }: PageProps<"/l/[slug]/matches/[matchId]">) {
@@ -33,6 +35,11 @@ export default async function MatchPage({ params }: PageProps<"/l/[slug]/matches
         ← All matches
       </Link>
       <Scoreboard match={match} />
+      {recapsEnabled() && match.status === "FINISHED" && match.recap && (
+        <Section title="Recap" id="recap">
+          <RecapCard recap={match.recap} />
+        </Section>
+      )}
       <Section title="Goals" id="goals">
         {match.goals.length ? (
           <Card>
