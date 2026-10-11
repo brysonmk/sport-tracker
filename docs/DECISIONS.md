@@ -124,3 +124,33 @@ Consequences:
   in pickup games people sometimes play for the other side.
 - **Teams with matches can't be deleted; players can.** Deleting a team would rewrite past
   results. Deleting a player keeps their goals in the score as "unknown scorer".
+
+## M3 Live match mode
+
+- **Live updates: polling a tiny "version" endpoint, then `router.refresh()`.**
+  Every public league page (via the league layout) runs `<LiveUpdates>`, which asks
+  `GET /api/leagues/<slug>/version` every 3 s while a match is live (30 s otherwise). The
+  version is "number of matches + newest `Match.updatedAt`", and every write that matters
+  bumps `updatedAt`. When the version changes, `router.refresh()` re-renders the server
+  components in place: no full reload, scroll position kept, and the page uses exactly the
+  same rendering code as a normal visit.
+  Why not the alternatives:
+  - *WebSockets*: Vercel serverless functions can't hold open connections; it would need a
+    separate service (Pusher, Ably, Supabase Realtime) plus an account and secrets.
+  - *Server-Sent Events*: possible on Vercel, but each viewer holds a function open for the
+    whole match (cost and duration limits) and it still needs a way to hear about writes.
+  - *`router.refresh()` on a timer without the version check*: simpler, but re-renders the
+    whole page every 3 s for every viewer even when nothing changed.
+  Cost: one small aggregate query per viewer per 3 s during a match, nothing while the tab
+  is hidden. Worst-case delay ≈ 3 s, which meets "within a few seconds".
+- **Polling pauses while the tab is hidden** and checks immediately when it's shown again
+  (phone unlocked, tab switched back).
+- **An empty minute during a live match means "now"**: the server fills it from
+  `startedAt` (`elapsedMinute`, unit-tested). The admin can still type a minute.
+- **The live clock ticks in the browser** (`MatchClock`) from `startedAt`; no server round
+  trip needed for the time.
+- **Share image via the `opengraph-image.tsx` file convention** (next/og). Next adds the
+  `og:image` tags itself. `metadataBase` uses `APP_URL`, else Vercel's
+  `VERCEL_PROJECT_PRODUCTION_URL`, because chat apps need absolute image URLs. Chat apps
+  cache previews, so a link shared mid-game can show an older score; that's accepted.
+- **The score has `aria-live="polite"` while live**, so screen readers announce goals.
