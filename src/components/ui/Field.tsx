@@ -14,7 +14,7 @@ export function Field({
   hint,
   children,
 }: {
-  label: string;
+  label: React.ReactNode;
   name: string;
   errors?: string[];
   hint?: string;

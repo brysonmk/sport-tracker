@@ -43,7 +43,9 @@ export default async function AdminTeamsPage({ params }: PageProps<"/a/[token]/t
                     <details>
                       <summary className="flex min-h-8 cursor-pointer list-none items-center justify-between gap-2">
                         <span className="font-medium">{team.name}</span>
-                        <span className="text-sm text-muted">Edit</span>
+                        <span className="text-sm text-muted">
+                          Edit<span className="sr-only"> {team.name}</span>
+                        </span>
                       </summary>
                       <div className="mt-3 flex flex-col gap-3 border-t border-line pt-3">
                         <RenameTeamForm token={token} team={team} />
@@ -55,6 +57,7 @@ export default async function AdminTeamsPage({ params }: PageProps<"/a/[token]/t
                           <ConfirmButton
                             action={deleteTeam.bind(null, token, team.id)}
                             confirmMessage={`Delete ${team.name}? Its players become free agents.`}
+                            ariaLabel={`Delete team ${team.name}`}
                           >
                             Delete team
                           </ConfirmButton>
@@ -92,13 +95,16 @@ export default async function AdminTeamsPage({ params }: PageProps<"/a/[token]/t
                           <details>
                             <summary className="flex min-h-8 cursor-pointer list-none items-center justify-between gap-2">
                               <span>{player.name}</span>
-                              <span className="text-sm text-muted">Edit</span>
+                              <span className="text-sm text-muted">
+                                Edit<span className="sr-only"> {player.name}</span>
+                              </span>
                             </summary>
                             <div className="mt-3 flex flex-col gap-3 border-t border-line pt-3">
                               <EditPlayerForm token={token} player={player} teams={teams} />
                               <ConfirmButton
                                 action={deletePlayer.bind(null, token, player.id)}
                                 confirmMessage={`Delete ${player.name}? Their goals stay in the scores but no longer count for them.`}
+                                ariaLabel={`Delete player ${player.name}`}
                               >
                                 Delete player
                               </ConfirmButton>

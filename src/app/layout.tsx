@@ -46,8 +46,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} flex min-h-dvh flex-col font-sans antialiased`}>
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-card focus:px-4 focus:py-2 focus:shadow"
+        >
+          Skip to content
+        </a>
         <Header />
-        <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-12 pt-4">{children}</main>
+        <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 pb-12 pt-4">
+          {children}
+        </main>
         <Footer />
       </body>
     </html>

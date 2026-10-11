@@ -59,10 +59,10 @@ export function EditPlayerForm({
   return (
     <form action={formAction} className="flex flex-col gap-3" noValidate>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Name" name={`player-${player.id}-name`} errors={state.fieldErrors?.name}>
+        <Field label={<>Name<span className="sr-only"> of {player.name}</span></>} name={`player-${player.id}-name`} errors={state.fieldErrors?.name}>
           {(a11y) => <Input {...a11y} name="name" defaultValue={state.values?.name ?? player.name} maxLength={40} />}
         </Field>
-        <Field label="Team" name={`player-${player.id}-team`} errors={state.fieldErrors?.teamId}>
+        <Field label={<>Team<span className="sr-only"> of {player.name}</span></>} name={`player-${player.id}-team`} errors={state.fieldErrors?.teamId}>
           {(a11y) => (
             <Select {...a11y} key={state.values?.teamId} name="teamId" defaultValue={state.values?.teamId ?? player.teamId ?? ""}>
               <TeamOptions teams={teams} />
@@ -71,7 +71,9 @@ export function EditPlayerForm({
         </Field>
       </div>
       <FormError message={state.error} />
-      <SubmitButton variant="secondary">Save</SubmitButton>
+      <SubmitButton variant="secondary" aria-label={`Save ${player.name}`}>
+        Save
+      </SubmitButton>
     </form>
   );
 }
