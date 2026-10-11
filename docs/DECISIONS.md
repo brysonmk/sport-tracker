@@ -206,3 +206,110 @@ Consequences:
   Postgres service, uploading the HTML report (traces, screenshots) when it fails.
 - **The live spec arranges an already-live match** so it runs on the 3 s polling path.
   The 30 s idle path is the same code with a different interval.
+
+## M7 Stretch
+
+### 1. Player profiles and a personal feed
+
+- **"Personal" without accounts means "this device".** The leagues you've opened and the
+  players you follow are kept in `localStorage` (`src/lib/follows.ts`). No signup, nothing
+  personal on the server. It doesn't sync between devices; that's the cost of no accounts.
+- **Leagues are remembered automatically when visited**, most recent first, capped at 10.
+  Players are followed explicitly with a button, capped at 20.
+- **The admin token is remembered on the device that opened the admin link**, so "Your
+  leagues" can show an *Admin* shortcut. It only ever goes into this browser's storage,
+  where the link already was (history, bookmarks). It's never sent to the feed API.
+- **One feed endpoint** (`GET /api/feed?leagues=…&players=…`) returns public summaries for
+  all followed leagues and players, refreshed every 30 s while the home page is visible.
+  Inputs are filtered by shape (slug/id regex) and capped before any query.
+- **The player page counts involvement, not appearances.** The app records goals, not
+  line-ups, so "matches played" can't be known. The page shows goals, assists, scorer rank
+  and a per-match log (`playerLog`, unit-tested), with running totals ready for charts.
+
+### 2. Charts of player stats over time
+
+- **Hand-written SVG, no chart library** (`src/components/StepChart.tsx`, ~200 lines). Two
+  small charts don't justify a dependency, and every line of the chart is readable.
+- **Step lines of running totals.** Goals so far only change when a goal happens, so the
+  line is flat between matches and jumps on match day; a sloped line would invent goals
+  between matches.
+- **Where:** a player's goals and assists over the season (player page), and the top 3
+  scorers' race (players page). Three series max: the palette's first three colours pass
+  colour-blind separation checks for every pair, on our own light and dark card colours
+  (validated with the dataviz palette script). The one light-mode colour under 3:1
+  contrast (aqua) is covered by end labels, the legend, the tooltip and the table.
+- **Overlapping lines are nudged by 3 px** so a tie never hides a player; exact values are
+  in the tooltip and end labels.
+- **Interaction:** the crosshair snaps to the nearest match date on hover or tap; the
+  chart is focusable and the arrow keys step through dates. The tooltip lists every
+  series at that date. Text never uses the series colour; a swatch beside it does.
+- **Drawn after mount at the real width**, so text isn't stretched and dates use the
+  viewer's timezone. The same data is always also on the page as a list or table.
+
+### 3. CSV import and export
+
+- **Export: four public CSV downloads** (league table, player stats, matches, every goal)
+  at `/api/leagues/<slug>/export/<kind>`, linked from the admin settings page. Public,
+  because it's the same data the public pages show. Built from the same snapshot as the
+  pages, so a download always matches the screen. Times are UTC ISO strings, which every
+  spreadsheet parses.
+- **Formula-injection guard on export.** A cell starting with `= + - @` (or tab/CR) gets a
+  leading apostrophe, so a player named `=HYPERLINK(...)` can't run anything when the
+  organiser opens the file. Numbers (e.g. goal difference -2) are written as numbers.
+- **Import: rosters only (player, team).** The common real need is "I have the team list
+  in a spreadsheet". Importing match results would need date/team matching rules and is
+  easy to get subtly wrong; results are quick to enter by hand.
+- **Import is safe to repeat**: names are matched ignoring case; existing players are
+  skipped; missing teams are created; problems are reported with the spreadsheet's line
+  numbers. One transaction; players inserted with one `createMany`.
+- **Own CSV parser (~40 lines, tested)** rather than a dependency: quotes, commas and line
+  breaks in quotes, `""`, CRLF, Excel's byte-order mark. Limits: 200 KB, 500 rows.
+- **The file is read in the browser** and shown in the text box before import, so the
+  organiser sees exactly what will be sent; the server re-validates everything.
+
+### 4. Installable PWA
+
+- **Manifest via Next's `app/manifest.ts`**; icons rendered from two hand-written SVGs
+  (`public/icons/*.svg`) by `scripts/make-icons.ts` (sharp), and the PNGs are committed. A
+  separate full-bleed "maskable" icon so Android can crop it to its own shape;
+  `app/apple-icon.png` for iOS "Add to Home Screen".
+- **A tiny service worker that only provides an offline page.** It handles page
+  navigations network-first and falls back to a cached `/offline` page; it never caches
+  league data or API responses. Caching scores would mean showing a stale table or score
+  during a match, which is worse than showing "you're offline".
+- **It also keeps copies of the build's static files** (`/_next/static/…`, content-hashed
+  and never changed), so the offline page has its styles. Found in self-review: the first
+  version cached only the page's HTML, which rendered unstyled offline.
+- **Registered in production builds only**, so it never interferes with hot reloading;
+  `/sw.js` is served with `no-cache` so fixes reach phones on the next visit.
+- **Checked with Chrome's own installability check** (DevTools protocol
+  `Page.getInstallabilityErrors`: none) against a production build, and the offline
+  fallback with Playwright's offline mode.
+
+### 5. AI match recaps
+
+- **Off unless `ANTHROPIC_API_KEY` is set.** With no key, no recap UI renders anywhere and
+  nothing calls the API (an e2e test checks this). The key lives in `.env` / Vercel only.
+- **Written on demand by the admin, stored on the match.** A "Write recap" button on a
+  finished match's admin page; the text is saved in `Match.recap` and shown on the public
+  match page. Not generated per page view (cost, latency) and not automatically on
+  "Finish" (the admin often fixes goals right after the whistle).
+- **Cleared whenever goals or status change**, so a recap never describes a different
+  score than the one on screen. The admin rewrites it with one tap.
+- **The model sees only the match facts** (teams, final score, each goal's minute, team,
+  scorer, assist) as JSON, and the instructions forbid inventing anything else. Names are
+  data inside a marked block and the prompt says to treat them only as names, so a player
+  called "ignore your instructions" can't steer it. Output is plain text, cleaned and
+  capped at 1000 characters, and labelled "Written by AI" on the page.
+- **Model `claude-opus-5-5` at `effort: "low"`.** Opus 5.5 is the current default model;
+  a 2–4 sentence factual summary doesn't need deep reasoning, so low effort keeps it fast
+  and cheap. `fallbacks: "default"` (server-side fallback beta) retries on another model
+  inside the same call if a safety classifier declines; a final refusal or `max_tokens`
+  stop is shown as an error rather than partial text.
+- **Errors are mapped from the SDK's typed classes** (auth, rate limit, other API errors)
+  to readable messages; anything else is a bug and is rethrown.
+- **Not verified against the real API**: there's no key on the development machine.
+  Response handling is unit-tested with a stub client (text, refusal, max_tokens, empty,
+  API errors). First real check: set the key and write one recap.
+- **`server-only` is aliased to an empty module in Vitest** so server modules like
+  `src/server/recap.ts` can be unit-tested directly.

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Sports Tracker icon: a simple ball on the app's green. Source for scripts/make-icons.ts. -->
+  <rect width="512" height="512" fill="#0f7a3d"/>
+  <circle cx="256" cy="256" r="150" fill="#ffffff"/>
+  <polygon points="256.0,204.0 305.5,239.9 286.6,298.1 225.4,298.1 206.5,239.9" fill="#14181a"/>
+  <g stroke="#14181a" stroke-width="12" stroke-linecap="round"><line x1="256.0" y1="204.0" x2="256.0" y2="112.0"/><line x1="305.5" y1="239.9" x2="393.0" y2="211.5"/><line x1="286.6" y1="298.1" x2="340.6" y2="372.5"/><line x1="225.4" y1="298.1" x2="171.4" y2="372.5"/><line x1="206.5" y1="239.9" x2="119.0" y2="211.5"/></g>
+</svg>

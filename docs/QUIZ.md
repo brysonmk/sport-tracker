@@ -58,9 +58,9 @@ memory first, then check by reading the code, then read the answers at the botto
 
 ## Answers
 
-**1.** Nowhere. A goal is a `MatchEvent` row (`prisma/schema.prisma:99`) and the score is
+**1.** Nowhere. A goal is a `MatchEvent` row (`prisma/schema.prisma:103`) and the score is
 counted from those rows by `scoreOf` (`src/domain/score.ts:9`), called in `toMatchView`
-(`src/server/snapshot.ts:120`). With stored score columns, every goal add/delete would have
+(`src/server/snapshot.ts:122`). With stored score columns, every goal add/delete would have
 to update two places in step; if they ever disagreed, the scoreboard would say 2–1 while
 the goal list and the player stats showed 1–1. Deriving the score keeps one source of
 truth (docs/DECISIONS.md, M1).
@@ -72,12 +72,12 @@ attacker with the hashes can try billions of guesses. This token is 24 random by
 (192 bits) from `randomBytes`, so there is nothing to guess; a fast hash is enough to make
 a database leak useless for building admin links.
 
-**3.** `requireAdminLeague(token)` (`actions.ts:187`) returns league A. The match is looked
-up with `where: { id: matchId, leagueId: league.id }` (line 193), so it's A's match. Then
-line 195 checks that `goal.teamId` is that match's home or away team; league B's team id
+**3.** `requireAdminLeague(token)` (`actions.ts:243`) returns league A. The match is looked
+up with `where: { id: matchId, leagueId: league.id }` (line 249), so it's A's match. Then
+line 251 checks that `goal.teamId` is that match's home or away team; league B's team id
 isn't, so the action returns the field error "Pick one of the two teams in this match"
-(line 196) and writes nothing. Scorer and assist ids are checked the same way against
-league A (lines 198–200). The pattern throughout `actions.ts`: never trust an id from the
+(line 252) and writes nothing. Scorer and assist ids are checked the same way against
+league A (lines 254–256). The pattern throughout `actions.ts`: never trust an id from the
 browser without filtering by the league that the token unlocked.
 
 **4.** Neither moves. `computeStandings` keeps only FINISHED matches
@@ -97,7 +97,7 @@ Comets). A fourth team below them would be position 4. This is the "1, 1, 1" cas
 
 **6.** Number of matches in the league and the newest `Match.updatedAt`, in ms
 (`src/server/leagueVersion.ts:18`). `addGoal`'s transaction updates `match.updatedAt`
-(`actions.ts:210`). Inserting a `MatchEvent` alone doesn't change the `Match` row, so
+(`actions.ts:266`). Inserting a `MatchEvent` alone doesn't change the `Match` row, so
 without that update the version would stay the same, `LiveUpdates` would never call
 `router.refresh()` (`LiveUpdates.tsx:36`), and spectators would only see the goal after a
 manual reload. `deleteGoal` bumps `updatedAt` for the same reason. Status changes update
@@ -140,7 +140,7 @@ mounts, so a changing `key` forces a re-mount with the returned value
 spread caused a React warning (question 14).
 
 **12.** The zod schema turns the empty input into `null` (`src/server/schemas.ts`, the
-`minute` field). `addGoal` line 204: if the minute is null and the match is LIVE with a
+`minute` field). `addGoal` line 260: if the minute is null and the match is LIVE with a
 `startedAt`, it uses `elapsedMinute(startedAt, now)` (`src/domain/matchClock.ts:6`): 0–59
 seconds after kick-off is minute 1, capped at 200. For a SCHEDULED match there's no clock,
 so `minute` stays `null` and the goal list shows "–".

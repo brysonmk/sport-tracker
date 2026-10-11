@@ -86,6 +86,10 @@ model Match {
   /// Bumped on every change, including when a goal is added (see src/server). The
   /// live page uses it to tell whether anything changed.
   updatedAt  DateTime    @updatedAt
+  /// AI-written summary of a finished match (only when ANTHROPIC_API_KEY is set; see
+  /// src/server/recap.ts). Cleared whenever the goals or status change, so it's never stale.
+  recap      String?
+  recapAt    DateTime?
 
   events MatchEvent[]
 

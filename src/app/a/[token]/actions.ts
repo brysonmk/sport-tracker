@@ -14,11 +14,16 @@
 import { redirect } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
 import { elapsedMinute } from "@/domain/matchClock";
+import { recapFacts } from "@/domain/recap";
+import { parseRoster } from "@/domain/roster";
 import { statusChange } from "@/domain/matchStatus";
 import type { MatchStatus } from "@/domain/types";
+import { parseCsv } from "@/lib/csv";
 import { db } from "@/lib/db";
 import type { FormState } from "@/lib/formState";
 import { requireAdminLeague, revalidateLeague } from "@/server/admin";
+import { recapsEnabled, writeRecap } from "@/server/recap";
+import { getLeagueSnapshot } from "@/server/snapshot";
 import {
   formToObject,
   fromZodError,
@@ -145,6 +150,56 @@ export async function deletePlayer(token: string, playerId: string): Promise<voi
   revalidateLeague(league, token);
 }
 
+/** 200 KB of CSV is thousands of rows; anything bigger is not a roster. */
+const MAX_IMPORT_BYTES = 200_000;
+
+/**
+ * Adds players (and any teams they name) from CSV text. Players already in the league
+ * (same name, ignoring case) are left alone, so importing the same file twice is safe.
+ */
+export async function importRoster(token: string, _prev: FormState, formData: FormData): Promise<FormState> {
+  const league = await requireAdminLeague(token);
+  const csv = formData.get("csv");
+  if (typeof csv !== "string" || csv.trim() === "") return { fieldErrors: { csv: ["Paste or choose a CSV file first"] } };
+  if (csv.length > MAX_IMPORT_BYTES) return { fieldErrors: { csv: ["That file is too big for a roster (max 200 KB)"] } };
+
+  const { entries, problems } = parseRoster(parseCsv(csv));
+  if (entries.length === 0) return { error: problems[0] ?? "No players found in the file", values: { csv } };
+
+  const result = await db.$transaction(async (tx) => {
+    const teams = await tx.team.findMany({ where: { leagueId: league.id } });
+    const teamIdByName = new Map(teams.map((t) => [t.name.toLowerCase(), t.id]));
+    const existing = await tx.player.findMany({ where: { leagueId: league.id }, select: { name: true } });
+    const existingNames = new Set(existing.map((p) => p.name.toLowerCase()));
+
+    // New teams first (usually a handful), then every new player in one insert.
+    let teamsAdded = 0;
+    const newPlayers: { leagueId: string; name: string; teamId: string | null }[] = [];
+    for (const entry of entries) {
+      if (existingNames.has(entry.name.toLowerCase())) continue;
+      let teamId: string | null = null;
+      if (entry.team) {
+        teamId = teamIdByName.get(entry.team.toLowerCase()) ?? null;
+        if (!teamId) {
+          teamId = (await tx.team.create({ data: { leagueId: league.id, name: entry.team } })).id;
+          teamIdByName.set(entry.team.toLowerCase(), teamId);
+          teamsAdded++;
+        }
+      }
+      newPlayers.push({ leagueId: league.id, name: entry.name, teamId });
+    }
+    await tx.player.createMany({ data: newPlayers });
+    return { teamsAdded, playersAdded: newPlayers.length, skipped: entries.length - newPlayers.length };
+  });
+
+  revalidateLeague(league, token);
+  const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? "" : "s"}`;
+  const parts = [`Added ${plural(result.playersAdded, "player")} and ${plural(result.teamsAdded, "team")}.`];
+  if (result.skipped) parts.push(`${plural(result.skipped, "player")} already in the league, skipped.`);
+  if (problems.length) parts.push(...problems);
+  return { ok: true, message: parts.join(" ") };
+}
+
 // ─── Matches ─────────────────────────────────────────────────────────────────
 
 export async function createMatch(token: string, _prev: FormState, formData: FormData): Promise<FormState> {
@@ -177,7 +232,8 @@ export async function changeMatchStatus(token: string, matchId: string, to: Matc
   const change = statusChange(match, to, new Date());
   if (!change) throw new Error(`Can't change a ${match.status.toLowerCase()} match to ${to.toLowerCase()}`);
 
-  await db.match.update({ where: { id: match.id }, data: change });
+  // A recap describes a final result; any change makes it stale, so it's removed.
+  await db.match.update({ where: { id: match.id }, data: { ...change, recap: null, recapAt: null } });
   revalidateLeague(league, token);
 }
 
@@ -207,7 +263,7 @@ export async function addGoal(token: string, matchId: string, _prev: FormState, 
   // latest updatedAt to know when to refresh (see src/app/api/leagues/[slug]/version).
   await db.$transaction([
     db.matchEvent.create({ data: { matchId: match.id, ...goal, minute } }),
-    db.match.update({ where: { id: match.id }, data: { updatedAt: now } }),
+    db.match.update({ where: { id: match.id }, data: { updatedAt: now, recap: null, recapAt: null } }),
   ]);
   revalidateLeague(league, token);
   return { ok: true };
@@ -220,7 +276,26 @@ export async function deleteGoal(token: string, goalId: string): Promise<void> {
 
   await db.$transaction([
     db.matchEvent.delete({ where: { id: goal.id } }),
-    db.match.update({ where: { id: goal.matchId }, data: { updatedAt: new Date() } }),
+    db.match.update({ where: { id: goal.matchId }, data: { updatedAt: new Date(), recap: null, recapAt: null } }),
   ]);
   revalidateLeague(league, token);
+}
+
+// ─── AI recap ────────────────────────────────────────────────────────────────
+
+/** Writes (or rewrites) the AI recap of a finished match. Only when recaps are enabled. */
+export async function writeMatchRecap(token: string, matchId: string): Promise<FormState> {
+  const league = await requireAdminLeague(token);
+  if (!recapsEnabled()) return { error: "AI recaps aren't set up on this server." };
+
+  const match = (await getLeagueSnapshot(league.id)).matches.find((m) => m.id === matchId);
+  if (!match) return { error: "Match not found" };
+  if (match.status !== "FINISHED") return { error: "Finish the match first; a recap describes the final result." };
+
+  const result = await writeRecap(recapFacts(match));
+  if (!result.ok) return { error: result.error };
+
+  await db.match.update({ where: { id: match.id }, data: { recap: result.text, recapAt: new Date() } });
+  revalidateLeague(league, token);
+  return { ok: true };
 }

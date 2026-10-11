@@ -3,39 +3,39 @@
 Read this first in every session. Updated after each step.
 
 ## Done
-- M1 Foundation (PR #1, merged): Firebase leftovers removed, package renamed,
-  Next 16.4 / React 19.3, ESLint + typecheck + Vitest, CI, Postgres in Docker,
-  Prisma 7 data model + first migration, demo seed, docs/PLAN.md.
-- M2 Core flows (PR #2, merged): create league with no signup (public + admin link), admin
-  teams/players/matches/goals/status, public table/matches/match/players pages,
-  standings with tiebreakers + player stats + match status rules (all unit-tested),
-  placeholder pages replaced (home, about, contact, /open; /login and /matches-table
-  redirect), 404 and error pages. Checked by hand in a phone-sized browser: create →
-  teams → players → match → goals → finish → table and stats update.
-- M3 Live match mode (PR #3, merged): public league pages poll a version endpoint and refresh
-  in place (checked by hand: a goal saved in the admin tab showed on the public tab
-  2.7 s later without a reload); live match clock; empty goal minute = now while live;
-  score-card share image for match links.
-- M4 Ship it (PR #4, merged), everything except the deploy itself: loading skeletons, skip link,
-  unique labels, AA contrast, security headers, `vercel-build` with migrations,
-  docs/DEPLOY.md, README with screenshots + share card + local setup.
+- **M1 Foundation** (PR #1): Firebase leftovers removed, package renamed, Next 16.4 /
+  React 19.3, ESLint + typecheck + Vitest, CI, Postgres in Docker, Prisma 7 data model,
+  demo seed, docs/PLAN.md.
+- **M2 Core flows** (PR #2): league with no signup (public + admin link), teams, players,
+  matches, goals and status; public table/matches/match/players pages; standings with
+  tiebreakers and player stats (unit-tested); placeholder pages replaced.
+- **M3 Live match mode** (PR #3): public pages poll a version endpoint and refresh in
+  place (~3 s while live); live clock; auto goal minute; score-card share image.
+- **M4 Ship it, except the deploy** (PR #4): loading states, accessibility pass, security
+  headers, migrations in the Vercel build, docs/DEPLOY.md, README with screenshots.
+- **M5 End-to-end tests** (PR #5): Playwright + page objects + fixtures, mobile and
+  desktop, console-error guard, in CI against a production build.
+- **M6 Learning pack** (PR #6): ARCHITECTURE.md, WALKTHROUGH.md, QUIZ.md.
+- **M7 Stretch** (PR #7), all five items:
+  1. Player profiles and a personal feed (this device's leagues and followed players).
+  2. Over-time charts: player goals/assists, top-3 scoring race.
+  3. CSV: four formula-safe downloads; roster import.
+  4. Installable PWA: manifest, icons, offline-page service worker (Chrome
+     installability check: no errors).
+  5. AI match recaps, only with `ANTHROPIC_API_KEY`. Not yet run against the real API
+     (no key on this machine); response handling unit-tested with a stub client.
+  Tests at the end of M7: 143 unit, 28 e2e (14 tests × mobile + desktop).
+  WALKTHROUGH/QUIZ line references re-checked after M7's changes.
 
 ## Waiting on the owner
-- **Create the Vercel + Neon accounts**: follow docs/DEPLOY.md (about 5 minutes), then
-  share the production URL. After that: add the live link to the README and check the
-  deployed app (create league, live update, share image).
-
-- M5 End-to-end tests (PR #5, merged; both CI jobs green): Playwright suite with page objects and fixtures, 9 tests
-  × 2 projects (mobile, desktop) covering create league, record match, standings
-  update, live view; console-error guard; runs in CI against a production build.
-  Locally 18/18 passed, and 54/54 with `--repeat-each=3`.
-- M6 Learning pack (PR #6): docs/ARCHITECTURE.md (two Mermaid diagrams, checked to
-  render), docs/WALKTHROUGH.md (reading order + one goal traced with file:line),
-  docs/QUIZ.md (15 questions, answers at the bottom).
+- **Deploy**: create the Vercel + Neon accounts with docs/DEPLOY.md (about 5 minutes),
+  then share the production URL. Then: README live link + check the deployed app.
+- **Optional**: an Anthropic API key in Vercel/.env to turn on recaps (docs/DEPLOY.md).
 
 ## In progress
-- M7 Stretch, in order: player profiles + personal feed on the home page; stat charts
-  over time; CSV import/export; installable PWA; LLM match recaps (only with an API key).
+- Nothing. All milestones in the brief are done except the deploy above.
 
 ## Next
-- After M7: anything the owner asks for after reviewing.
+- After the deploy: add the live link to the README, re-take screenshots from production
+  data if useful, run one real recap.
+- Whatever the owner asks for after reviewing.
