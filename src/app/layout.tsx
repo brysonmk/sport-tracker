@@ -14,9 +14,16 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+/** APP_URL if set; on Vercel, the production domain it provides; else localhost. */
+function siteUrl() {
+  if (process.env.APP_URL) return process.env.APP_URL;
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  return "http://localhost:3000";
+}
+
 export const metadata: Metadata = {
-  // Absolute base for share links and images (og:image) in metadata.
-  metadataBase: new URL(process.env.APP_URL ?? "http://localhost:3000"),
+  // Absolute base for share links and images (og:image): chat apps need full URLs.
+  metadataBase: new URL(siteUrl()),
   title: {
     default: "Sports Tracker",
     template: "%s · Sports Tracker",
