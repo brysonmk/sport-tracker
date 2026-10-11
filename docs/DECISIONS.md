@@ -266,3 +266,19 @@ Consequences:
   breaks in quotes, `""`, CRLF, Excel's byte-order mark. Limits: 200 KB, 500 rows.
 - **The file is read in the browser** and shown in the text box before import, so the
   organiser sees exactly what will be sent; the server re-validates everything.
+
+### 4. Installable PWA
+
+- **Manifest via Next's `app/manifest.ts`**; icons rendered from two hand-written SVGs
+  (`public/icons/*.svg`) by `scripts/make-icons.ts` (sharp), and the PNGs are committed. A
+  separate full-bleed "maskable" icon so Android can crop it to its own shape;
+  `app/apple-icon.png` for iOS "Add to Home Screen".
+- **A tiny service worker that only provides an offline page.** It handles page
+  navigations network-first and falls back to a cached `/offline` page; it never caches
+  league data or API responses. Caching scores would mean showing a stale table or score
+  during a match, which is worse than showing "you're offline".
+- **Registered in production builds only**, so it never interferes with hot reloading;
+  `/sw.js` is served with `no-cache` so fixes reach phones on the next visit.
+- **Checked with Chrome's own installability check** (DevTools protocol
+  `Page.getInstallabilityErrors`: none) against a production build, and the offline
+  fallback with Playwright's offline mode.
