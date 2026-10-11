@@ -56,7 +56,7 @@ export default async function AdminMatchPage({ params }: PageProps<"/a/[token]/m
 
       <Section title="Add a goal" id="add-goal">
         <Card>
-          <GoalForm token={token} matchId={match.id} home={match.home} away={match.away} players={players} />
+          <GoalForm token={token} matchId={match.id} home={match.home} away={match.away} players={players} isLive={match.status === "LIVE"} />
         </Card>
       </Section>
 

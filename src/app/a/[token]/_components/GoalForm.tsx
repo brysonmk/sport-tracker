@@ -20,12 +20,15 @@ export function GoalForm({
   home,
   away,
   players,
+  isLive,
 }: {
   token: string;
   matchId: string;
   home: Team;
   away: Team;
   players: Player[];
+  /** While live, an empty minute is filled in from the match clock on the server. */
+  isLive: boolean;
 }) {
   const [state, formAction] = useActionState(addGoal.bind(null, token, matchId), initialFormState);
   const [teamId, setTeamId] = useState(home.id);
@@ -95,7 +98,7 @@ export function GoalForm({
           )}
         </Field>
         <Field label="Minute" name="minute" errors={state.fieldErrors?.minute}>
-          {(a11y) => <Input {...a11y} name="minute" inputMode="numeric" pattern="[0-9]*" placeholder="–" />}
+          {(a11y) => <Input {...a11y} name="minute" inputMode="numeric" pattern="[0-9]*" placeholder={isLive ? "now" : "–"} />}
         </Field>
       </div>
       <FormError message={state.error} />

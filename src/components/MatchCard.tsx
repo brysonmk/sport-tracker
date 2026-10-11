@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { MatchView } from "@/server/snapshot";
+import { MatchClock } from "./MatchClock";
 import { LocalTime } from "./ui/LocalTime";
 import { StatusBadge } from "./StatusBadge";
 
@@ -14,7 +15,7 @@ export function MatchCard({ match, href }: { match: MatchView; href: string }) {
     >
       <div className="mb-1 flex items-center justify-between text-xs text-muted">
         <StatusBadge status={match.status} />
-        {when && <LocalTime date={when} />}
+        {match.status === "LIVE" && match.startedAt ? <MatchClock startedAt={match.startedAt} /> : when && <LocalTime date={when} />}
       </div>
       {/* The visual row is hidden from screen readers; they get the sentence below. */}
       <div aria-hidden className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
