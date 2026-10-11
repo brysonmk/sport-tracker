@@ -16,7 +16,7 @@ Read this first in every session. Updated after each step.
   in place (checked by hand: a goal saved in the admin tab showed on the public tab
   2.7 s later without a reload); live match clock; empty goal minute = now while live;
   score-card share image for match links.
-- M4 Ship it (PR #4), everything except the deploy itself: loading skeletons, skip link,
+- M4 Ship it (PR #4, merged), everything except the deploy itself: loading skeletons, skip link,
   unique labels, AA contrast, security headers, `vercel-build` with migrations,
   docs/DEPLOY.md, README with screenshots + share card + local setup.
 
@@ -25,9 +25,13 @@ Read this first in every session. Updated after each step.
   share the production URL. After that: add the live link to the README and check the
   deployed app (create league, live update, share image).
 
+- M5 End-to-end tests (PR #5): Playwright suite with page objects and fixtures, 9 tests
+  × 2 projects (mobile, desktop) covering create league, record match, standings
+  update, live view; console-error guard; runs in CI against a production build.
+  Locally 18/18 passed, and 54/54 with `--repeat-each=3`.
+
 ## In progress
-- M5 End-to-end tests (Playwright + page objects, in CI).
+- M6 Learning pack: ARCHITECTURE.md, WALKTHROUGH.md, QUIZ.md.
 
 ## Next
-- M6 Learning pack: ARCHITECTURE.md, WALKTHROUGH.md, QUIZ.md.
 - M7 Stretch (in order, if time allows).
