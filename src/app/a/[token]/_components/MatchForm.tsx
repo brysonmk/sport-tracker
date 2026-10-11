@@ -14,12 +14,14 @@ export function MatchForm({ token, teams }: { token: string; teams: { id: string
       {t.name}
     </option>
   ));
+  // A <select>'s defaultValue only applies when it mounts, so each select is keyed on
+  // the value sent back after a failed submit: a new key re-mounts it with that value.
   return (
     <form action={formAction} className="flex flex-col gap-4" noValidate>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Home team" name="homeTeamId" errors={state.fieldErrors?.homeTeamId}>
           {(a11y) => (
-            <Select {...a11y} name="homeTeamId" defaultValue={state.values?.homeTeamId ?? ""} required>
+            <Select {...a11y} key={state.values?.homeTeamId} name="homeTeamId" defaultValue={state.values?.homeTeamId ?? ""} required>
               <option value="" disabled>Choose…</option>
               {options}
             </Select>
@@ -27,7 +29,7 @@ export function MatchForm({ token, teams }: { token: string; teams: { id: string
         </Field>
         <Field label="Away team" name="awayTeamId" errors={state.fieldErrors?.awayTeamId}>
           {(a11y) => (
-            <Select {...a11y} name="awayTeamId" defaultValue={state.values?.awayTeamId ?? ""} required>
+            <Select {...a11y} key={state.values?.awayTeamId} name="awayTeamId" defaultValue={state.values?.awayTeamId ?? ""} required>
               <option value="" disabled>Choose…</option>
               {options}
             </Select>

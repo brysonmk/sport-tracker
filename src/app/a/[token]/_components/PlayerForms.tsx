@@ -23,16 +23,18 @@ function TeamOptions({ teams }: { teams: Team[] }) {
 
 export function AddPlayerForm({ token, teams }: { token: string; teams: Team[] }) {
   const [state, formAction] = useActionState(addPlayer.bind(null, token), initialFormState);
+  // After a save, keep the team that was just used so several players can be added in a row.
+  const defaultTeamId = state.values?.teamId ?? teams[0]?.id ?? "";
   return (
     <form action={formAction} className="flex flex-col gap-3" noValidate>
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Player name" name="player-name" errors={state.fieldErrors?.name}>
           {(a11y) => <Input {...a11y} name="name" defaultValue={state.values?.name} maxLength={40} autoComplete="off" />}
         </Field>
-        {/* key: re-mount after each save so the select shows the team returned in state.values */}
+        {/* key: defaultValue only applies on mount, so re-mount the select when it changes */}
         <Field label="Team" name="player-team" errors={state.fieldErrors?.teamId}>
           {(a11y) => (
-            <Select {...a11y} key={state.values?.teamId} name="teamId" defaultValue={state.values?.teamId ?? teams[0]?.id ?? ""}>
+            <Select {...a11y} key={defaultTeamId} name="teamId" defaultValue={defaultTeamId}>
               <TeamOptions teams={teams} />
             </Select>
           )}
@@ -62,7 +64,7 @@ export function EditPlayerForm({
         </Field>
         <Field label="Team" name={`player-${player.id}-team`} errors={state.fieldErrors?.teamId}>
           {(a11y) => (
-            <Select {...a11y} name="teamId" defaultValue={state.values?.teamId ?? player.teamId ?? ""}>
+            <Select {...a11y} key={state.values?.teamId} name="teamId" defaultValue={state.values?.teamId ?? player.teamId ?? ""}>
               <TeamOptions teams={teams} />
             </Select>
           )}

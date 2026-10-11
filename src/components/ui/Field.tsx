@@ -48,8 +48,14 @@ export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={`${control} ${props.className ?? ""}`} />;
 }
 
-export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select {...props} className={`${control} ${props.className ?? ""}`} />;
+// `children` is passed as real JSX children (not inside the spread): spreading an array
+// of children through props makes React treat it as a list and warn about missing keys.
+export function Select({ children, className = "", ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <select {...props} className={`${control} ${className}`}>
+      {children}
+    </select>
+  );
 }
 
 /** A message for the whole form (not tied to one input). */

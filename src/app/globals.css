@@ -57,3 +57,9 @@ body {
 .tabular {
   font-variant-numeric: tabular-nums;
 }
+
+/* Column headers like "GD" carry a title tooltip; no dotted underline needed. */
+abbr[title] {
+  text-decoration: none;
+  cursor: help;
+}

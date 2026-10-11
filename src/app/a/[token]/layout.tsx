@@ -6,7 +6,7 @@ import { findLeagueByAdminToken } from "@/server/leagues";
 
 // Admin pages must never show up in search results.
 export const metadata: Metadata = {
-  title: "Admin",
+  title: { default: "Admin", template: "%s · Admin" },
   robots: { index: false, follow: false },
   referrer: "no-referrer",
 };
