@@ -56,7 +56,7 @@ export default async function LeaguePage({ params }: PageProps<"/l/[slug]">) {
         id="top-scorers"
         action={<Link href={`/l/${slug}/players`} className="text-sm text-accent">All players</Link>}
       >
-        {topScorers.length ? <PlayerStatsTable rows={topScorers} caption="Top scorers" /> : <EmptyState>No goals yet.</EmptyState>}
+        {topScorers.length ? <PlayerStatsTable rows={topScorers} caption="Top scorers" slug={slug} /> : <EmptyState>No goals yet.</EmptyState>}
       </Section>
     </div>
   );

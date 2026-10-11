@@ -1,6 +1,16 @@
+import Link from "next/link";
 import type { PlayerStatsRow } from "@/domain/playerStats";
 
-export function PlayerStatsTable({ rows, caption = "Player stats" }: { rows: PlayerStatsRow[]; caption?: string }) {
+/** Goals and assists per player. Names link to the player's page when `slug` is given. */
+export function PlayerStatsTable({
+  rows,
+  caption = "Player stats",
+  slug,
+}: {
+  rows: PlayerStatsRow[];
+  caption?: string;
+  slug?: string;
+}) {
   return (
     <div className="overflow-x-auto rounded-xl border border-line bg-card">
       <table className="tabular w-full text-sm">
@@ -17,7 +27,13 @@ export function PlayerStatsTable({ rows, caption = "Player stats" }: { rows: Pla
           {rows.map((r) => (
             <tr key={r.playerId} className="border-b border-line last:border-0">
               <th scope="row" className="py-2.5 pl-3 text-left font-normal">
-                <span className="font-medium">{r.playerName}</span>
+                {slug ? (
+                  <Link href={`/l/${slug}/players/${r.playerId}`} className="font-medium hover:text-accent hover:underline">
+                    {r.playerName}
+                  </Link>
+                ) : (
+                  <span className="font-medium">{r.playerName}</span>
+                )}
                 {r.teamName && <span className="block text-xs text-muted">{r.teamName}</span>}
               </th>
               <td data-col="goals" className="px-2 py-2.5 text-right font-bold">{r.goals}</td>

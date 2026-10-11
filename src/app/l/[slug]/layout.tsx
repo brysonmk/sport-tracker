@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { LiveUpdates } from "@/components/LiveUpdates";
 import { NavTabs } from "@/components/NavTabs";
+import { RememberLeague } from "@/components/RememberLeague";
 import { findLeagueBySlug } from "@/server/leagues";
 import { getLeagueVersion } from "@/server/leagueVersion";
 import { getLeagueSnapshot } from "@/server/snapshot";
@@ -29,13 +30,14 @@ export default async function LeagueLayout({ params, children }: LayoutProps<"/l
   return (
     <div>
       <LiveUpdates slug={slug} version={version} intervalMs={anyLive ? LIVE_POLL_MS : IDLE_POLL_MS} />
+      <RememberLeague slug={slug} name={league.name} />
       <h1 className="mb-4 text-2xl font-bold">{league.name}</h1>
       <NavTabs
         label="League sections"
         tabs={[
           { href: base, label: "Table" },
           { href: `${base}/matches`, label: "Matches", prefixes: [`${base}/matches`] },
-          { href: `${base}/players`, label: "Players" },
+          { href: `${base}/players`, label: "Players", prefixes: [`${base}/players`] },
         ]}
       />
       {children}

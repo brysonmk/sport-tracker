@@ -17,7 +17,7 @@ export default async function PlayersPage({ params }: PageProps<"/l/[slug]/playe
 
   return (
     <div>
-      <PlayerStatsTable rows={playerStats} />
+      <PlayerStatsTable rows={playerStats} slug={slug} />
       <p className="mt-2 text-xs text-muted">Counts finished matches only. Own goals and unknown scorers aren&apos;t credited.</p>
     </div>
   );
