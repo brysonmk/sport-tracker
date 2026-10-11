@@ -39,10 +39,15 @@ Read this first in every session. Updated after each step.
 - M7.2 Charts: player goals/assists over the season, top-3 scoring race (hand-written
   SVG step charts, validated palette, hover/keyboard crosshair).
 - M7.3 CSV: four public CSV downloads (formula-safe); roster import (paste or file).
+- M7.4 PWA, partly: app icons (SVG sources + `scripts/make-icons.ts`), web app manifest,
+  apple-icon. **Not done yet:** service worker + offline page, an install check in the
+  browser, decision log entry.
 
 ## In progress
 - M7 Stretch, in order: player profiles + personal feed on the home page; stat charts
   over time; CSV import/export; installable PWA; LLM match recaps (only with an API key).
 
 ## Next
+- Finish M7.4 (above), then M7.5 LLM match recaps (only when an API key is set).
+- Then: e2e run + CI for PR #7, merge it.
 - After M7: anything the owner asks for after reviewing.
