@@ -90,3 +90,8 @@ Consequences:
   pretending the alphabet decided the ranking.
 - **A player can't assist their own goal.** The form prevents it; the stats function also
   ignores it in case bad data gets in.
+- **Teams can't be deleted while matches point at them (database RESTRICT).** So deleting a
+  whole league must delete its matches first (they cascade to their goals), then the
+  league (cascades to teams and players). The seed does this in one transaction. Tried
+  `ON DELETE NO ACTION` to let one league delete cascade through everything; Postgres
+  still fired the team check before the goals were gone, so it was reverted.

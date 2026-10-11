@@ -69,8 +69,13 @@ function daysFromNow(days: number): Date {
 }
 
 async function main() {
-  // Deleting the league cascades to its teams, players, matches and events.
-  await db.league.deleteMany({ where: { slug: DEMO_SLUG } });
+  // Remove the previous demo league. Matches go first: a team can't be deleted while a
+  // match or goal still points at it (on purpose, see schema.prisma), and deleting the
+  // matches cascades to their goals. Then the league cascades to its teams and players.
+  await db.$transaction([
+    db.match.deleteMany({ where: { league: { slug: DEMO_SLUG } } }),
+    db.league.deleteMany({ where: { slug: DEMO_SLUG } }),
+  ]);
 
   const adminToken = generateAdminToken();
   const league = await db.league.create({
