@@ -4,11 +4,38 @@ A soccer league tracker for rec and pickup groups. Create a league without signi
 record matches (score, scorers, assists), and everyone gets standings, player stats and
 live scores on their phone.
 
-> Status: under construction. See [docs/PROGRESS.md](docs/PROGRESS.md).
+**Live app:** not deployed yet. The account steps are in [docs/DEPLOY.md](docs/DEPLOY.md).
+
+| League table | Match | Player stats | Home |
+|---|---|---|---|
+| ![League table](docs/screenshots/table.png) | ![Match page](docs/screenshots/match.png) | ![Player stats](docs/screenshots/players.png) | ![Home page](docs/screenshots/home.png) |
+
+Pasting a match link into a chat shows a score card:
+
+![Share card](docs/screenshots/share-card.png)
+
+All names and results in the screenshots are demo data from [prisma/seed.ts](prisma/seed.ts).
+
+## What it does
+
+- **No accounts.** Creating a league gives you a public link (read-only, share it) and a
+  secret admin link (edit). Only a hash of the admin token is stored.
+- **Teams, players, matches, goals and assists**, entered from a phone.
+- **Standings** with 3/1/0 points and tiebreakers: goal difference, goals scored,
+  head-to-head, then a shared position.
+- **Player stats**: goals, assists, goals + assists.
+- **Live mode**: the admin logs goals during the game; public pages update within about
+  3 seconds without a refresh, with a running match clock.
+- **Share image** for match links (Open Graph).
+
+## Tech
+
+Next.js 16 (App Router, Server Components, Server Actions) · React 19 · Tailwind CSS 4 ·
+Prisma 7 + PostgreSQL 17 · Zod · Vitest · GitHub Actions · Vercel + Neon.
 
 ## Local setup
 
-Requirements: Node 24 (see `.nvmrc`), Docker.
+Requirements: Node 24 (see `.nvmrc`) and Docker.
 
 ```bash
 npm install                 # also generates the Prisma client
@@ -31,12 +58,14 @@ npm run dev                 # http://localhost:3000
 | `npm run db:migrate` | Create/apply Prisma migrations in development |
 | `npm run db:seed` | Replace the demo league |
 | `npm run db:reset` | Drop the local database, re-apply migrations, re-seed |
+| `npm run screenshots` | Re-take the README screenshots (see `scripts/screenshots.ts`) |
 
 ## Docs
 
 - [docs/PLAN.md](docs/PLAN.md): architecture and milestones
 - [docs/DECISIONS.md](docs/DECISIONS.md): every choice and why
 - [docs/PROGRESS.md](docs/PROGRESS.md): done / in progress / next
+- [docs/DEPLOY.md](docs/DEPLOY.md): deploying to Vercel + Neon
 
 ## How it was built
 

@@ -26,11 +26,13 @@ export function RenameTeamForm({ token, team }: { token: string; team: { id: str
   return (
     <form action={formAction} className="flex flex-col gap-3 sm:flex-row sm:items-start" noValidate>
       <div className="flex-1">
-        <Field label="New name" name={`rename-${team.id}`} errors={state.fieldErrors?.name}>
+        <Field label={<>New name<span className="sr-only"> for {team.name}</span></>} name={`rename-${team.id}`} errors={state.fieldErrors?.name}>
           {(a11y) => <Input {...a11y} name="name" defaultValue={state.values?.name ?? team.name} maxLength={40} />}
         </Field>
       </div>
-      <SubmitButton variant="secondary" className="sm:mt-6">Save</SubmitButton>
+      <SubmitButton variant="secondary" className="sm:mt-6" aria-label={`Save name for ${team.name}`}>
+        Save
+      </SubmitButton>
     </form>
   );
 }

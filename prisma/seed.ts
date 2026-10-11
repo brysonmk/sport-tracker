@@ -64,8 +64,11 @@ const MATCHES: DemoMatch[] = [
   { home: "Demo Blues", away: "Demo Greens", daysAgo: -7, finished: false, goals: [] },
 ];
 
+/** A date `days` from today at 23:00 UTC (7 pm in US/Canada Eastern summer time). */
 function daysFromNow(days: number): Date {
-  return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+  const date = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+  date.setUTCHours(23, 0, 0, 0);
+  return date;
 }
 
 async function main() {

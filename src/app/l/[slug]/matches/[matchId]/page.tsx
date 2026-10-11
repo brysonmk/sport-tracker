@@ -39,7 +39,9 @@ export default async function MatchPage({ params }: PageProps<"/l/[slug]/matches
             <GoalTimeline goals={match.goals} />
           </Card>
         ) : (
-          <EmptyState>{match.status === "SCHEDULED" ? "Not started yet." : "No goals yet."}</EmptyState>
+          <EmptyState>
+            {match.status === "SCHEDULED" ? "Not started yet." : match.status === "LIVE" ? "No goals yet." : "No goals in this match."}
+          </EmptyState>
         )}
       </Section>
     </div>
