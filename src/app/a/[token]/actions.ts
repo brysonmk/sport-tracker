@@ -13,6 +13,7 @@
 
 import { redirect } from "next/navigation";
 import { Prisma } from "@/generated/prisma/client";
+import { elapsedMinute } from "@/domain/matchClock";
 import { statusChange } from "@/domain/matchStatus";
 import type { MatchStatus } from "@/domain/types";
 import { db } from "@/lib/db";
@@ -198,11 +199,15 @@ export async function addGoal(token: string, matchId: string, _prev: FormState, 
   const playersFound = await db.player.count({ where: { leagueId: league.id, id: { in: playerIds } } });
   if (playersFound !== playerIds.length) return { error: "Pick players from this league", values };
 
-  // Creating the goal and bumping match.updatedAt together: the live page watches
-  // updatedAt to know something changed (M3).
+  // During a live match an empty minute means "now": take it from the match clock.
+  const now = new Date();
+  const minute = goal.minute ?? (match.status === "LIVE" && match.startedAt ? elapsedMinute(match.startedAt, now) : null);
+
+  // Create the goal and bump match.updatedAt together: public pages poll the league's
+  // latest updatedAt to know when to refresh (see src/app/api/leagues/[slug]/version).
   await db.$transaction([
-    db.matchEvent.create({ data: { matchId: match.id, ...goal } }),
-    db.match.update({ where: { id: match.id }, data: { updatedAt: new Date() } }),
+    db.matchEvent.create({ data: { matchId: match.id, ...goal, minute } }),
+    db.match.update({ where: { id: match.id }, data: { updatedAt: now } }),
   ]);
   revalidateLeague(league, token);
   return { ok: true };
