@@ -25,13 +25,17 @@ Read this first in every session. Updated after each step.
   share the production URL. After that: add the live link to the README and check the
   deployed app (create league, live update, share image).
 
-- M5 End-to-end tests (PR #5): Playwright suite with page objects and fixtures, 9 tests
+- M5 End-to-end tests (PR #5, merged; both CI jobs green): Playwright suite with page objects and fixtures, 9 tests
   × 2 projects (mobile, desktop) covering create league, record match, standings
   update, live view; console-error guard; runs in CI against a production build.
   Locally 18/18 passed, and 54/54 with `--repeat-each=3`.
+- M6 Learning pack (PR #6): docs/ARCHITECTURE.md (two Mermaid diagrams, checked to
+  render), docs/WALKTHROUGH.md (reading order + one goal traced with file:line),
+  docs/QUIZ.md (15 questions, answers at the bottom).
 
 ## In progress
-- M6 Learning pack: ARCHITECTURE.md, WALKTHROUGH.md, QUIZ.md.
+- M7 Stretch, in order: player profiles + personal feed on the home page; stat charts
+  over time; CSV import/export; installable PWA; LLM match recaps (only with an API key).
 
 ## Next
-- M7 Stretch (in order, if time allows).
+- After M7: anything the owner asks for after reviewing.

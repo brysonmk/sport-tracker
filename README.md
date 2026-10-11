@@ -31,7 +31,7 @@ All names and results in the screenshots are demo data from [prisma/seed.ts](pri
 ## Tech
 
 Next.js 16 (App Router, Server Components, Server Actions) · React 19 · Tailwind CSS 4 ·
-Prisma 7 + PostgreSQL 17 · Zod · Vitest · GitHub Actions · Vercel + Neon.
+Prisma 7 + PostgreSQL 17 · Zod · Vitest · Playwright · GitHub Actions · Vercel + Neon.
 
 ## Local setup
 
@@ -55,6 +55,7 @@ npm run dev                 # http://localhost:3000
 | `npm run lint` | ESLint |
 | `npm run typecheck` | Generate route types, then `tsc --noEmit` |
 | `npm test` | Vitest unit tests (`npm run test:watch` to watch) |
+| `npm run test:e2e` | Playwright end-to-end tests (`npm run test:e2e:ui` for UI mode) |
 | `npm run db:migrate` | Create/apply Prisma migrations in development |
 | `npm run db:seed` | Replace the demo league |
 | `npm run db:reset` | Drop the local database, re-apply migrations, re-seed |
@@ -62,6 +63,12 @@ npm run dev                 # http://localhost:3000
 
 ## Docs
 
+Learning the codebase? Start with the first three.
+
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): diagrams of the data flow and layers, and why
+- [docs/WALKTHROUGH.md](docs/WALKTHROUGH.md): files in reading order, then one goal traced end to end
+- [docs/QUIZ.md](docs/QUIZ.md): 15 questions to check your understanding (answers at the bottom)
+- [e2e/README.md](e2e/README.md): the Playwright suite and how to extend it
 - [docs/PLAN.md](docs/PLAN.md): architecture and milestones
 - [docs/DECISIONS.md](docs/DECISIONS.md): every choice and why
 - [docs/PROGRESS.md](docs/PROGRESS.md): done / in progress / next
@@ -72,4 +79,5 @@ npm run dev                 # http://localhost:3000
 Built by an AI coding agent (Claude Code) working from the brief in
 [CLAUDE.md](CLAUDE.md), in small commits with one pull request per milestone. Each
 choice and its reason is logged in [docs/DECISIONS.md](docs/DECISIONS.md), and CI checks
-lint, types, unit tests, migrations and the build on every pull request.
+lint, types, unit tests, migrations, the build and the Playwright suite on every pull
+request.
