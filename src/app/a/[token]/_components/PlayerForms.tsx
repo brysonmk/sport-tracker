@@ -34,7 +34,7 @@ export function AddPlayerForm({ token, teams }: { token: string; teams: Team[] }
         {/* key: defaultValue only applies on mount, so re-mount the select when it changes */}
         <Field label="Team" name="player-team" errors={state.fieldErrors?.teamId}>
           {(a11y) => (
-            <Select {...a11y} key={defaultTeamId} name="teamId" defaultValue={defaultTeamId}>
+            <Select key={defaultTeamId} {...a11y} name="teamId" defaultValue={defaultTeamId}>
               <TeamOptions teams={teams} />
             </Select>
           )}
@@ -64,7 +64,7 @@ export function EditPlayerForm({
         </Field>
         <Field label={<>Team<span className="sr-only"> of {player.name}</span></>} name={`player-${player.id}-team`} errors={state.fieldErrors?.teamId}>
           {(a11y) => (
-            <Select {...a11y} key={state.values?.teamId} name="teamId" defaultValue={state.values?.teamId ?? player.teamId ?? ""}>
+            <Select key={state.values?.teamId} {...a11y} name="teamId" defaultValue={state.values?.teamId ?? player.teamId ?? ""}>
               <TeamOptions teams={teams} />
             </Select>
           )}
